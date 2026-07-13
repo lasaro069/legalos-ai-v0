@@ -1,0 +1,18 @@
+node_modules
+.next
+out
+dist
+.env
+.env.local
+npm-debug.log*
+
+# Logs
+*.log
+*.err.log
+
+# Next logs
+.next-dev*.log
+.next-start*.log
+
+# VS Code
+.vscode/
