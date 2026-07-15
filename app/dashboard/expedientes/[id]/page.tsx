@@ -9,7 +9,7 @@ export default async function DetalleExpedientePage({ params }: { params: { id: 
   // Obtener expediente
   const { data: expediente, error } = await supabase
     .from('expedientes')
-    .select('*, firmas(nombre), responsable_id')
+    .select('*, firmas(nombre), responsable_id, eventos_agenda(*)')
     .eq('id', params.id)
     .single()
 
@@ -70,6 +70,48 @@ export default async function DetalleExpedientePage({ params }: { params: { id: 
           </div>
         </div>
       </div>
+
+      {/* Sección de Términos/Agenda Pendientes */}
+      {(() => {
+        const terminosPendientes = expediente.eventos_agenda?.filter((t: any) => t.estado !== 'realizada' && t.estado !== 'cancelada') || []
+        
+        if (terminosPendientes.length > 0) {
+          return (
+            <div className="bg-orange-50/50 border border-orange-200 rounded-xl p-6 mt-2 shadow-sm">
+              <h3 className="text-lg font-bold text-legal-ink mb-4 flex items-center gap-2">
+                <span className="text-orange-500">⚠️</span> Términos y Vencimientos Activos
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {terminosPendientes.map((termino: any) => {
+                  const fecha = new Date(termino.fecha_inicio)
+                  const hoy = new Date()
+                  fecha.setHours(0,0,0,0)
+                  hoy.setHours(0,0,0,0)
+                  const diffDias = Math.round((fecha.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
+                  
+                  return (
+                    <div key={termino.id} className="bg-white p-4 rounded-lg border border-orange-100 shadow-sm flex flex-col">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-orange-100 text-orange-800">
+                          {termino.tipo.replace('_', ' ')}
+                        </span>
+                        <span className={`text-xs font-bold ${diffDias < 0 ? 'text-red-600' : diffDias <= 3 ? 'text-orange-600' : 'text-gray-500'}`}>
+                          {diffDias === 0 ? "Vence hoy" : diffDias < 0 ? `Venció hace ${Math.abs(diffDias)} días` : `En ${diffDias} días`}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-legal-ink text-sm leading-tight">{termino.titulo}</h4>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        }
+        return null
+      })()}
 
       {/* Sección de Actuaciones */}
       <div className="flex justify-between items-end mt-4">

@@ -34,6 +34,7 @@ export default async function DashboardLayout({
           <nav className="hidden md:flex gap-6 border-l border-legal-navy pl-6 ml-2">
             <Link href="/dashboard" className="text-sm text-gray-300 hover:text-legal-gold transition-colors">Inicio</Link>
             <Link href="/dashboard/expedientes" className="text-sm text-gray-300 hover:text-legal-gold transition-colors">Expedientes</Link>
+            <Link href="/dashboard/agenda" className="text-sm text-gray-300 hover:text-legal-gold transition-colors">Agenda</Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">
