@@ -1,5 +1,7 @@
 'use client'
 
+import Link from 'next/link'
+
 type Expediente = {
   id: string
   nombre: string
@@ -34,7 +36,7 @@ export default function ExpedientesKanban({ expedientes }: { expedientes: Expedi
             
             <div className="flex flex-col gap-3 flex-1 overflow-y-auto pr-1">
               {expedientesColumna.map(exp => (
-                <div key={exp.id} className="bg-white p-4 rounded-lg shadow-sm border border-legal-line/30 hover:shadow-md transition-all cursor-pointer hover:-translate-y-0.5">
+                <Link href={`/dashboard/expedientes/${exp.id}`} key={exp.id} className="block bg-white p-4 rounded-lg shadow-sm border border-legal-line/30 hover:shadow-md transition-all cursor-pointer hover:-translate-y-0.5">
                   <div className="text-xs text-gray-500 mb-1 font-mono bg-gray-100 inline-block px-1 rounded">{exp.radicado || 'Sin radicado'}</div>
                   <h4 className="font-bold text-legal-ink mb-1 leading-tight">{exp.nombre}</h4>
                   <div className="text-xs text-legal-navy/80 mb-3 truncate">{exp.cliente || 'Sin cliente especificado'}</div>
@@ -54,7 +56,7 @@ export default function ExpedientesKanban({ expedientes }: { expedientes: Expedi
                       {exp.prioridad}
                     </span>
                   </div>
-                </div>
+                </Link>
               ))}
               
               {expedientesColumna.length === 0 && (
