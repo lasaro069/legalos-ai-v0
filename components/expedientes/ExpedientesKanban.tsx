@@ -1,0 +1,71 @@
+'use client'
+
+type Expediente = {
+  id: string
+  nombre: string
+  radicado: string
+  estado: string
+  riesgo: string
+  prioridad: string
+  cliente: string
+}
+
+const COLUMNAS = [
+  { id: 'activo', titulo: 'Activos', color: 'bg-blue-50 border-blue-200', text: 'text-blue-800' },
+  { id: 'archivado', titulo: 'Archivados', color: 'bg-gray-50 border-gray-200', text: 'text-gray-800' },
+  { id: 'cerrado', titulo: 'Cerrados', color: 'bg-green-50 border-green-200', text: 'text-green-800' },
+]
+
+export default function ExpedientesKanban({ expedientes }: { expedientes: Expediente[] }) {
+  // En un Kanban real usaríamos drag and drop (dnd-kit), aquí hacemos un layout simple para el MVP
+  return (
+    <div className="flex gap-6 overflow-x-auto pb-4 h-full min-h-[500px] flex-1">
+      {COLUMNAS.map(columna => {
+        const expedientesColumna = expedientes.filter(e => e.estado === columna.id)
+        
+        return (
+          <div key={columna.id} className={`flex-1 min-w-[320px] max-w-[400px] rounded-xl border ${columna.color} p-4 flex flex-col`}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className={`font-bold capitalize ${columna.text}`}>{columna.titulo}</h3>
+              <span className="bg-white text-xs font-bold px-2 py-1 rounded shadow-sm text-gray-700">
+                {expedientesColumna.length}
+              </span>
+            </div>
+            
+            <div className="flex flex-col gap-3 flex-1 overflow-y-auto pr-1">
+              {expedientesColumna.map(exp => (
+                <div key={exp.id} className="bg-white p-4 rounded-lg shadow-sm border border-legal-line/30 hover:shadow-md transition-all cursor-pointer hover:-translate-y-0.5">
+                  <div className="text-xs text-gray-500 mb-1 font-mono bg-gray-100 inline-block px-1 rounded">{exp.radicado || 'Sin radicado'}</div>
+                  <h4 className="font-bold text-legal-ink mb-1 leading-tight">{exp.nombre}</h4>
+                  <div className="text-xs text-legal-navy/80 mb-3 truncate">{exp.cliente || 'Sin cliente especificado'}</div>
+                  <div className="flex justify-between items-center mt-2 border-t pt-2 border-gray-50">
+                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                      exp.riesgo === 'critico' ? 'bg-red-100 text-red-700' :
+                      exp.riesgo === 'alto' ? 'bg-orange-100 text-orange-700' :
+                      'bg-gray-100 text-gray-700'
+                    }`}>
+                      Riesgo: {exp.riesgo}
+                    </span>
+                    <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
+                      exp.prioridad === 'urgente' ? 'bg-red-100 text-red-700' :
+                      exp.prioridad === 'alta' ? 'bg-orange-100 text-orange-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {exp.prioridad}
+                    </span>
+                  </div>
+                </div>
+              ))}
+              
+              {expedientesColumna.length === 0 && (
+                <div className="text-center p-6 text-sm text-gray-400 border-2 border-dashed border-gray-200/60 rounded-lg mt-2 bg-white/50">
+                  No hay expedientes en esta columna
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
