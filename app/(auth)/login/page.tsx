@@ -58,9 +58,9 @@ export default function LoginPage({
         </form>
 
         <div className="mt-8 text-center text-sm text-legal-navy/80">
-          ¿No tienes una cuenta?{' '}
-          <Link href="/register" className="text-legal-blue font-semibold hover:underline">
-            Crea tu Firma
+          ¿Olvidaste tu contraseña?{' '}
+          <Link href="/forgot-password" className="text-legal-blue font-semibold hover:underline">
+            Recuperar Contraseña
           </Link>
         </div>
       </div>

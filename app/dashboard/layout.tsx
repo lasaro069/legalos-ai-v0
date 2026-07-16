@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { logout } from '../(auth)/actions'
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
 export default async function DashboardLayout({
   children,
@@ -13,12 +14,26 @@ export default async function DashboardLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
+  const { data: usuarioData } = await supabase
+    .from('usuarios')
+    .select('requiere_cambio_password, es_superadmin')
+    .eq('id', user?.id)
+    .single()
+
+  if (usuarioData?.requiere_cambio_password) {
+    redirect('/update-password')
+  }
+
   // Fetch firma details for the user
   const { data: firmaData } = await supabase
     .from('miembros_firma')
-    .select('rol, firmas(nombre, id)')
+    .select('rol, firmas(nombre, id, ciudad)')
     .eq('usuario_id', user?.id)
     .single()
+
+  if (!usuarioData?.es_superadmin && firmaData?.firmas && firmaData.firmas.ciudad === null) {
+    redirect('/onboarding')
+  }
 
   const firmaNombre = firmaData?.firmas?.nombre || 'Firma no encontrada'
   const rol = firmaData?.rol || 'Miembro'
