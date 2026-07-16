@@ -26,9 +26,13 @@ export async function guardarExpediente(formData: FormData) {
     radicado: formData.get('radicado') as string,
     cliente_id: formData.get('cliente_id') ? formData.get('cliente_id') as string : null,
     partes: formData.get('partes') as string || null,
-    estado: 'activo',
+    estado: formData.get('estado') as string || 'activo',
     riesgo: formData.get('riesgo') as string || 'bajo',
-    responsable_id: formData.get('responsable_id') ? formData.get('responsable_id') as string : null
+    responsable_id: formData.get('responsable_id') ? formData.get('responsable_id') as string : null,
+    autoridad: formData.get('autoridad') as string || null,
+    area_juridica: formData.get('area_juridica') as string || null,
+    tipo_proceso: formData.get('tipo_proceso') as string || null,
+    cuantia: formData.get('cuantia') ? Number(formData.get('cuantia')) : null,
   }
 
   const { error } = await supabase

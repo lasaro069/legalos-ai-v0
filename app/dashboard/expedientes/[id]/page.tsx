@@ -42,15 +42,35 @@ export default async function DetalleExpedientePage({ params }: { params: { id: 
           <h3 className="text-xl font-bold text-legal-ink mb-1">{expediente.nombre}</h3>
           <p className="text-sm text-legal-navy/80 mb-4">{expediente.descripcion || 'Sin descripción'}</p>
           
-          <div className="text-sm grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+          <div className="text-sm grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 mt-4">
             <div>
-              <span className="block text-xs text-gray-500 uppercase font-bold mb-1">Cliente</span>
-              {expediente.contactos?.nombre || 'No asignado'}
+              <span className="block text-[10px] text-gray-500 uppercase font-bold mb-0.5">Cliente</span>
+              <span className="font-semibold text-legal-ink">{expediente.contactos?.nombre || 'No asignado'}</span>
             </div>
             <div>
-              <span className="block text-xs text-gray-500 uppercase font-bold mb-1">Partes</span>
-              {expediente.partes || 'No asignado'}
+              <span className="block text-[10px] text-gray-500 uppercase font-bold mb-0.5">Partes Procesales</span>
+              <span className="text-legal-navy">{expediente.partes || 'No especificado'}</span>
             </div>
+            <div>
+              <span className="block text-[10px] text-gray-500 uppercase font-bold mb-0.5">Área Jurídica</span>
+              <span className="text-legal-navy">{expediente.area_juridica || 'No especificado'}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] text-gray-500 uppercase font-bold mb-0.5">Tipo de Proceso</span>
+              <span className="text-legal-navy">{expediente.tipo_proceso || 'No especificado'}</span>
+            </div>
+            <div className="col-span-2">
+              <span className="block text-[10px] text-gray-500 uppercase font-bold mb-0.5">Autoridad / Juzgado</span>
+              <span className="text-legal-navy">{expediente.autoridad || 'No especificado'}</span>
+            </div>
+            {expediente.cuantia != null && (
+              <div className="col-span-2 bg-green-50 p-2 rounded border border-green-100">
+                <span className="block text-[10px] text-green-700 uppercase font-bold mb-0.5">Cuantía (Valor)</span>
+                <span className="font-bold text-green-800">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(expediente.cuantia)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 

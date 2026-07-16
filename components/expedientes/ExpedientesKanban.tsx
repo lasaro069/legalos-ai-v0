@@ -10,6 +10,8 @@ type Expediente = {
   riesgo: string
   prioridad: string
   cliente: string
+  contactos?: { nombre: string }
+  cuantia?: number | null
 }
 
 const COLUMNAS = [
@@ -45,9 +47,16 @@ export default function ExpedientesKanban({ expedientes }: { expedientes: Expedi
                   <h4 className="font-bold text-legal-ink leading-tight mb-2 group-hover:text-legal-blue transition-colors">
                     {exp.nombre}
                   </h4>
-                  <p className="text-xs text-gray-500 mb-3 truncate" title={exp.contactos?.nombre || 'Sin cliente'}>
+                  <p className="text-xs text-gray-500 mb-2 truncate" title={exp.contactos?.nombre || 'Sin cliente'}>
                     👤 {exp.contactos?.nombre || 'Sin cliente'}
                   </p>
+                  
+                  {exp.cuantia != null && (
+                    <p className="text-[11px] font-mono text-green-700 bg-green-50 inline-block px-1.5 py-0.5 rounded border border-green-100 mb-2">
+                      💰 {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(Number(exp.cuantia))}
+                    </p>
+                  )}
+
                   <div className="flex justify-between items-center mt-2 border-t pt-2 border-gray-50">
                     <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
                       exp.riesgo === 'critico' ? 'bg-red-100 text-red-700' :
