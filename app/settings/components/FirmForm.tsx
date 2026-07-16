@@ -60,7 +60,8 @@ export function FirmForm({ initialData, canEdit }: { initialData: any, canEdit: 
       pais: pais.trim(),
       departamento: departamento.trim(),
       ciudad: ciudad.trim(),
-      zona_horaria: zonaHoraria
+      zona_horaria: zonaHoraria,
+      logo_url: logoUrl
     })
     
     if (res?.error) setError(res.error)

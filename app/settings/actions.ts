@@ -46,7 +46,8 @@ export async function updateFirmAction(firmaId: string, data: {
   ciudad: string,
   departamento: string,
   pais: string,
-  zona_horaria: string
+  zona_horaria: string,
+  logo_url?: string
 }) {
   const supabase = createServerClient()
   
@@ -65,7 +66,8 @@ export async function updateFirmAction(firmaId: string, data: {
     return { error: 'No tienes permisos para editar la firma' }
   }
 
-  const { error } = await supabase
+  const supabaseAdmin = getAdminSupabase()
+  const { error } = await supabaseAdmin
     .from('firmas')
     .update(data)
     .eq('id', firmaId)
