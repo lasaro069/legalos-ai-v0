@@ -32,9 +32,10 @@ export default async function DashboardLayout({
             <p className="text-xs text-legal-line opacity-80">{firmaNombre} ({rol})</p>
           </div>
           <nav className="hidden md:flex gap-6 border-l border-legal-navy pl-6 ml-2">
-            <Link href="/dashboard" className="text-sm text-gray-300 hover:text-legal-gold transition-colors">Inicio</Link>
-            <Link href="/dashboard/expedientes" className="text-sm text-gray-300 hover:text-legal-gold transition-colors">Expedientes</Link>
-            <Link href="/dashboard/agenda" className="text-sm text-gray-300 hover:text-legal-gold transition-colors">Agenda</Link>
+            <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors">Inicio</Link>
+            <Link href="/dashboard/expedientes" className="text-gray-300 hover:text-white transition-colors">Expedientes</Link>
+            <Link href="/dashboard/agenda" className="text-gray-300 hover:text-white transition-colors">Agenda</Link>
+            <Link href="/dashboard/contactos" className="text-gray-300 hover:text-white transition-colors">Directorio</Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">

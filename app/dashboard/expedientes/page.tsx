@@ -7,7 +7,7 @@ export default async function ExpedientesPage() {
   
   const { data: expedientes, error } = await supabase
     .from('expedientes')
-    .select('*')
+    .select('*, contactos(nombre)')
     .order('created_at', { ascending: false })
 
   return (

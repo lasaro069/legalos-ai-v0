@@ -1,0 +1,1 @@
+-- Archivo de semillas vacío. La base de datos iniciará sin registros de prueba.

@@ -9,7 +9,7 @@ export default async function DetalleExpedientePage({ params }: { params: { id: 
   // Obtener expediente
   const { data: expediente, error } = await supabase
     .from('expedientes')
-    .select('*, firmas(nombre), responsable_id, eventos_agenda(*)')
+    .select('*, firmas(nombre), responsable_id, eventos_agenda(*), contactos(nombre)')
     .eq('id', params.id)
     .single()
 
@@ -45,7 +45,7 @@ export default async function DetalleExpedientePage({ params }: { params: { id: 
           <div className="text-sm grid grid-cols-2 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
             <div>
               <span className="block text-xs text-gray-500 uppercase font-bold mb-1">Cliente</span>
-              {expediente.cliente || 'No asignado'}
+              {expediente.contactos?.nombre || 'No asignado'}
             </div>
             <div>
               <span className="block text-xs text-gray-500 uppercase font-bold mb-1">Partes</span>

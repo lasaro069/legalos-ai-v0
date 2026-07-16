@@ -1,0 +1,35 @@
+[
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000001",
+    "nombre": "Gómez & Asociados",
+    "credenciales_ingreso": {
+      "email": "admin@gomezasociados.com",
+      "password": "Password123!",
+      "rol": "propietario",
+      "nombre_completo": "Carlos Gómez"
+    },
+    "created_at": "2026-07-15T12:00:00Z"
+  },
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000002",
+    "nombre": "Firma Legal Justicia Global",
+    "credenciales_ingreso": {
+      "email": "gerencia@justiciaglobal.com",
+      "password": "Password123!",
+      "rol": "propietario",
+      "nombre_completo": "María Fernanda Ruiz"
+    },
+    "created_at": "2026-07-15T12:00:00Z"
+  },
+  {
+    "id": "a1b2c3d4-0000-0000-0000-000000000003",
+    "nombre": "Consultores Jurídicos del Norte",
+    "credenciales_ingreso": {
+      "email": "contacto@cjnorte.com",
+      "password": "Password123!",
+      "rol": "propietario",
+      "nombre_completo": "Andrés Felipe Silva"
+    },
+    "created_at": "2026-07-15T12:00:00Z"
+  }
+]

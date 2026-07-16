@@ -36,10 +36,18 @@ export default function ExpedientesKanban({ expedientes }: { expedientes: Expedi
             
             <div className="flex flex-col gap-3 flex-1 overflow-y-auto pr-1">
               {expedientesColumna.map(exp => (
-                <Link href={`/dashboard/expedientes/${exp.id}`} key={exp.id} className="block bg-white p-4 rounded-lg shadow-sm border border-legal-line/30 hover:shadow-md transition-all cursor-pointer hover:-translate-y-0.5">
-                  <div className="text-xs text-gray-500 mb-1 font-mono bg-gray-100 inline-block px-1 rounded">{exp.radicado || 'Sin radicado'}</div>
-                  <h4 className="font-bold text-legal-ink mb-1 leading-tight">{exp.nombre}</h4>
-                  <div className="text-xs text-legal-navy/80 mb-3 truncate">{exp.cliente || 'Sin cliente especificado'}</div>
+                <Link href={`/dashboard/expedientes/${exp.id}`} key={exp.id} className="block bg-white p-4 rounded-lg shadow-sm border border-legal-line/30 hover:shadow-md transition-shadow group cursor-pointer relative">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-xs font-mono text-legal-navy bg-blue-50 px-2 py-1 rounded">
+                      {exp.radicado || 'Sin radicado'}
+                    </span>
+                  </div>
+                  <h4 className="font-bold text-legal-ink leading-tight mb-2 group-hover:text-legal-blue transition-colors">
+                    {exp.nombre}
+                  </h4>
+                  <p className="text-xs text-gray-500 mb-3 truncate" title={exp.contactos?.nombre || 'Sin cliente'}>
+                    👤 {exp.contactos?.nombre || 'Sin cliente'}
+                  </p>
                   <div className="flex justify-between items-center mt-2 border-t pt-2 border-gray-50">
                     <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded ${
                       exp.riesgo === 'critico' ? 'bg-red-100 text-red-700' :
