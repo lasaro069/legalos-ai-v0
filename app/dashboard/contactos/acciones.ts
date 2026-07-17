@@ -8,41 +8,40 @@ export async function guardarContacto(formData: FormData) {
   const supabase = createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) throw new Error('No autenticado')
+  if (!user) throw new Error('Usuario no autenticado')
 
-  const { data: miembros } = await supabase
+  // Obtener firma_id
+  const { data: firmaData } = await supabase
     .from('miembros_firma')
     .select('firma_id')
     .eq('usuario_id', user.id)
-    .limit(1)
     .single()
-
-  if (!miembros) throw new Error('No hay firma asociada')
+    
+  if (!firmaData?.firma_id) throw new Error('Firma no encontrada')
 
   const nuevoContacto = {
-    firma_id: miembros.firma_id,
-    tipo_persona: formData.get('tipo_persona'),
-    nombre: formData.get('nombre'),
-    tipo_identificacion: formData.get('tipo_identificacion'),
-    identificacion: formData.get('identificacion'),
-    correo: formData.get('correo'),
-    telefono: formData.get('telefono'),
-    direccion: formData.get('direccion'),
-    ciudad: formData.get('ciudad'),
-    observaciones: formData.get('observaciones'),
+    firma_id: firmaData.firma_id,
+    tipo_persona: formData.get('tipo_persona') as string,
+    nombre: formData.get('nombre') as string,
+    tipo_identificacion: formData.get('tipo_identificacion') as string,
+    identificacion: formData.get('identificacion') as string || null,
+    correo: formData.get('correo') as string || null,
+    telefono: formData.get('telefono') as string || null,
+    direccion: formData.get('direccion') as string || null,
+    ciudad: formData.get('ciudad') as string || null,
+    observaciones: formData.get('observaciones') as string || null,
     creado_por: user.id
   }
 
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('contactos')
     .insert([nuevoContacto])
-    .select('id')
-    .single()
 
   if (error) {
-    throw new Error('Error guardando contacto: ' + error.message)
+    console.error("SUPABASE ERROR: ", error);
+    redirect(`/dashboard/contactos/nuevo?error=${encodeURIComponent(error.message)}`)
   }
 
   revalidatePath('/dashboard/contactos')
-  redirect(`/dashboard/contactos/${data.id}`)
+  redirect('/dashboard/contactos')
 }
