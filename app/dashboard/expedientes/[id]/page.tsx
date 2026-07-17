@@ -22,7 +22,7 @@ export default async function DetalleExpedientePage({ params }: { params: { id: 
     .from('actuaciones')
     .select('*, usuarios!actuaciones_creado_por_fkey(nombre_completo)')
     .eq('expediente_id', params.id)
-    .order('fecha_juridica', { ascending: false })
+    .order('fecha_juridica', { ascending: true })
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,9 +84,9 @@ export default async function DetalleExpedientePage({ params }: { params: { id: 
             </span>
           </div>
           <div className="text-sm mt-auto">
-            <button className="text-legal-gold hover:underline font-medium">
-              Editar detalles (Próximamente)
-            </button>
+            <Link href={`/dashboard/expedientes/${expediente.id}/editar`} className="text-legal-gold hover:underline font-medium flex items-center gap-1 justify-end">
+              ✏️ Editar detalles
+            </Link>
           </div>
         </div>
       </div>
@@ -140,7 +140,7 @@ export default async function DetalleExpedientePage({ params }: { params: { id: 
           <p className="text-sm text-legal-navy/70">Historial cronológico de eventos en el proceso</p>
         </div>
         <Link 
-          href={`/dashboard/expedientes/${expediente.id}/actuaciones/nueva`} 
+          href={`/dashboard/expedientes/${expediente.id}/actuaciones/nuevo`} 
           className="bg-legal-gold hover:bg-yellow-600 text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors text-sm flex items-center gap-2"
         >
           <span>+</span> Registrar Actuación

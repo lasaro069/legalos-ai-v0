@@ -1,72 +1,99 @@
 'use client'
 
-import { useState } from 'react'
+import { FileText, Paperclip, User, Calendar } from 'lucide-react'
 
 export default function ActuacionesTable({ actuaciones }: { actuaciones: any[] }) {
   if (!actuaciones || actuaciones.length === 0) {
     return (
-      <div className="bg-white p-12 rounded-xl border border-legal-line text-center text-gray-500 shadow-panel">
-        <div className="text-4xl mb-4 opacity-50">📄</div>
-        <h3 className="text-lg font-semibold text-legal-ink mb-1">Aún no hay actuaciones</h3>
+      <div className="bg-white p-12 rounded-2xl border border-dashed border-slate-300 text-center text-slate-500 shadow-sm mt-4">
+        <FileText size={48} className="mx-auto mb-4 opacity-20 text-legal-blue" />
+        <h3 className="text-lg font-bold text-slate-800 mb-2">Aún no hay actuaciones</h3>
         <p className="text-sm">Registra la primera actuación para comenzar la línea de vida de este expediente.</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-panel border border-legal-line overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 border-b border-legal-line/50 text-xs uppercase text-gray-500 font-bold">
-              <th className="p-4 w-32">Fecha</th>
-              <th className="p-4 w-40">Tipo</th>
-              <th className="p-4">Detalle de Actuación</th>
-              <th className="p-4 w-48">Registrado por</th>
-              <th className="p-4 w-24 text-center">Docs</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-legal-line/30">
-            {actuaciones.map((act) => (
-              <tr key={act.id} className="hover:bg-gray-50/50 transition-colors">
-                <td className="p-4 align-top">
-                  <div className="font-semibold text-legal-navy whitespace-nowrap">
-                    {new Date(act.fecha_juridica).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
+    <div className="relative mt-8 mb-12 ml-4 md:ml-8">
+      {/* Línea vertical principal */}
+      <div className="absolute top-0 bottom-0 left-[19px] md:left-[23px] w-0.5 bg-slate-200"></div>
+      
+      <div className="flex flex-col gap-8">
+        {actuaciones.map((act, index) => {
+          const isLatest = index === 0;
+          const fecha = new Date(act.fecha_juridica);
+          // Set to Bogota timezone for accurate date reading
+          fecha.setHours(fecha.getHours() + 5); 
+
+          return (
+            <div key={act.id} className="relative pl-16 md:pl-20 group">
+              
+              {/* Círculo del Timeline */}
+              <div className={`absolute left-0 top-1 flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full border-4 border-white shadow-sm z-10 transition-transform group-hover:scale-110
+                ${isLatest ? 'bg-legal-gold text-white' : 'bg-legal-blue text-white'}`}>
+                <FileText size={isLatest ? 20 : 18} />
+              </div>
+
+              {/* Contenido de la Actuación */}
+              <div className={`bg-white p-5 md:p-6 rounded-2xl border shadow-sm transition-all
+                ${isLatest ? 'border-legal-gold/40 shadow-md ring-1 ring-legal-gold/20' : 'border-slate-200 hover:border-slate-300 hover:shadow-md'}`}>
+                
+                {/* Cabecera */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 border-b border-slate-100 pb-4">
+                  <div className="flex items-center gap-3">
+                    <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider
+                      ${isLatest ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'}`}>
+                      {act.tipo.replace('_', ' ')}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-500 flex items-center gap-1.5">
+                      <Calendar size={14} />
+                      {fecha.toLocaleDateString('es-CO', { timeZone: 'America/Bogota', day: 'numeric', month: 'long', year: 'numeric' })}
+                    </span>
                   </div>
-                </td>
-                <td className="p-4 align-top">
-                  <span className="inline-block px-2.5 py-1 bg-gray-100 text-gray-800 text-xs font-bold rounded capitalize border border-gray-200 shadow-sm">
-                    {act.tipo}
-                  </span>
-                </td>
-                <td className="p-4 align-top">
-                  <div className="font-bold text-legal-ink mb-1">{act.titulo}</div>
-                  {act.descripcion && (
-                    <div className="text-sm text-gray-600 line-clamp-2">{act.descripcion}</div>
-                  )}
-                </td>
-                <td className="p-4 align-top text-sm text-gray-600">
-                  {act.usuarios?.nombre_completo || 'Usuario'}
-                </td>
-                <td className="p-4 align-top text-center">
-                  {act.documento_url ? (
-                    <a 
-                      href={act.documento_url} 
-                      target="_blank" 
-                      rel="noreferrer"
-                      className="text-legal-blue hover:text-legal-gold flex flex-col items-center gap-1 transition-colors"
-                      title="Ver documento adjunto"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                  
+                  <div className="flex items-center gap-2">
+                    {act.documento_url && (
+                      <a 
+                        href={act.documento_url} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold bg-legal-blue/5 hover:bg-legal-blue/10 text-legal-blue px-3 py-1.5 rounded-lg transition-colors"
+                        title="Ver documento adjunto"
+                      >
+                        <Paperclip size={14} />
+                        Ver Documento
+                      </a>
+                    )}
+                    
+                    <a href={`/dashboard/expedientes/${act.expediente_id}/actuaciones/${act.id}/editar`}
+                       className="p-1.5 text-slate-400 hover:text-legal-gold hover:bg-yellow-50 rounded-lg transition-colors"
+                       title="Editar actuación">
+                      ✏️
                     </a>
-                  ) : (
-                    <span className="text-gray-300">-</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  </div>
+                </div>
+                
+                {/* Cuerpo */}
+                <h4 className="text-lg font-black text-slate-900 mb-2">{act.titulo}</h4>
+                
+                {act.descripcion ? (
+                  <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-wrap bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+                    {act.descripcion}
+                  </p>
+                ) : (
+                  <p className="text-sm text-slate-400 italic">No hay notas adicionales para esta actuación.</p>
+                )}
+                
+                {/* Pie */}
+                <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 font-medium">
+                  <User size={14} />
+                  Registrado por: <span className="text-slate-700">{act.usuarios?.nombre_completo || 'Usuario'}</span>
+                </div>
+              </div>
+
+            </div>
+          )
+        })}
       </div>
     </div>
   )

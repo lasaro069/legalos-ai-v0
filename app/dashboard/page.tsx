@@ -11,26 +11,37 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
-  // 1. Identificar la firma
+  // 1. Identificar la firma y rol
   const { data: miembros } = await supabase
     .from('miembros_firma')
-    .select('firma_id')
+    .select('id, firma_id, rol')
     .eq('usuario_id', user.id)
 
+  const currentMember = miembros?.[0];
   const firmaIds = miembros?.map(m => m.firma_id) || []
-  if (firmaIds.length === 0) return <div>No perteneces a ninguna firma.</div>
+  if (firmaIds.length === 0 || !currentMember) return <div>No perteneces a ninguna firma.</div>
+
+  const isPrivileged = currentMember.rol === 'propietario' || currentMember.rol === 'admin';
+  const memberId = currentMember.id;
+  const userId = user.id;
 
   // 2. Traer Expedientes Activos para KPIs
-  const { data: expedientesActivos } = await supabase
+  let expedientesQuery = supabase
     .from('expedientes')
-    .select('riesgo, cuantia')
+    .select('id, riesgo, cuantia')
     .in('firma_id', firmaIds)
-    .eq('estado', 'activo')
+    .eq('estado', 'activo');
 
+  if (!isPrivileged) {
+    expedientesQuery = expedientesQuery.or(`responsable_id.eq.${memberId},auxiliar_id.eq.${memberId}`);
+  }
+
+  const { data: expedientesActivos } = await expedientesQuery;
   const expedientesActivosCount = expedientesActivos?.length || 0;
   
   let casosEnRiesgo = 0;
   let cuantiaTotal = 0;
+  const myExpedienteIds = expedientesActivos?.map(e => e.id) || [];
   
   expedientesActivos?.forEach(exp => {
     if (exp.riesgo === 'alto' || exp.riesgo === 'critico') casosEnRiesgo++;
@@ -47,23 +58,42 @@ export default async function DashboardPage() {
   };
 
   // 3. Traer Vencimientos (Alertas Urgentes)
-  const hoyStr = new Date().toISOString()
-  const { data: eventosUrgentes } = await supabase
+  let eventosQuery = supabase
     .from('eventos_agenda')
     .select('*, expedientes(nombre)')
     .in('firma_id', firmaIds)
     .neq('estado', 'realizada')
     .neq('estado', 'cancelada')
     .order('fecha_inicio', { ascending: true })
-    .limit(8)
+    .limit(8);
+
+  if (!isPrivileged) {
+    // Si no es admin, ve los eventos de sus expedientes o los que le están asignados directamente
+    if (myExpedienteIds.length > 0) {
+      eventosQuery = eventosQuery.or(`expediente_id.in.(${myExpedienteIds.join(',')}),responsable_id.eq.${userId}`);
+    } else {
+      eventosQuery = eventosQuery.eq('responsable_id', userId);
+    }
+  }
+
+  const { data: eventosUrgentes } = await eventosQuery;
 
   // 4. Traer Últimas Actuaciones (Recientes)
-  const { data: ultimasActuaciones } = await supabase
+  let actuacionesQuery = supabase
     .from('actuaciones')
     .select('*, expedientes!inner(firma_id, nombre, radicado), responsable:usuarios!actuaciones_creado_por_fkey(nombre_completo)')
     .in('expedientes.firma_id', firmaIds)
     .order('created_at', { ascending: false })
-    .limit(10)
+    .limit(10);
+
+  if (!isPrivileged && myExpedienteIds.length > 0) {
+    actuacionesQuery = actuacionesQuery.in('expediente_id', myExpedienteIds);
+  } else if (!isPrivileged && myExpedienteIds.length === 0) {
+    // Si no tiene expedientes, no ve actuaciones
+    actuacionesQuery = actuacionesQuery.eq('id', '00000000-0000-0000-0000-000000000000'); // query vacio
+  }
+
+  const { data: ultimasActuaciones } = await actuacionesQuery;
 
   // Cálculo de KPIs de eventos
   let eventosVencidos = 0
