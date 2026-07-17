@@ -68,13 +68,16 @@ export default async function DashboardPage() {
   // Cálculo de KPIs de eventos
   let eventosVencidos = 0
   let eventosProximos = 0
-  const hoy = new Date()
-  hoy.setHours(0,0,0,0)
+  
+  const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' })
+  const hoyYMD = formatter.format(new Date())
+  const hoyStrBog = new Date(`${hoyYMD}T00:00:00`)
 
   eventosUrgentes?.forEach(e => {
-    const fecha = new Date(e.fecha_inicio)
-    fecha.setHours(0,0,0,0)
-    const diffDias = Math.round((fecha.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
+    const eventYMD = formatter.format(new Date(e.fecha_inicio))
+    const fechaStrBog = new Date(`${eventYMD}T00:00:00`)
+    
+    const diffDias = Math.round((fechaStrBog.getTime() - hoyStrBog.getTime()) / (1000 * 60 * 60 * 24))
     if (diffDias < 0) eventosVencidos++
     if (diffDias >= 0 && diffDias <= 3) eventosProximos++
   })
@@ -188,18 +191,19 @@ export default async function DashboardPage() {
               </div>
             ) : (
               eventosUrgentes.map((evento) => {
-                const fecha = new Date(evento.fecha_inicio)
-                fecha.setHours(0,0,0,0)
-                const diffDias = Math.round((fecha.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24))
+                const eventYMD = formatter.format(new Date(evento.fecha_inicio))
+                const fechaStrBog = new Date(`${eventYMD}T00:00:00`)
+                const diffDias = Math.round((fechaStrBog.getTime() - hoyStrBog.getTime()) / (1000 * 60 * 60 * 24))
                 
                 const isVencido = diffDias < 0
                 const isHoy = diffDias === 0
+                const evtDateObj = new Date(evento.fecha_inicio)
                 
                 return (
                   <div key={evento.id} className="group flex gap-4 p-4 rounded-xl border border-slate-100 hover:border-slate-300 hover:shadow-sm transition-all bg-white">
                     <div className="flex flex-col items-center justify-center w-14 shrink-0 border-r border-slate-100 pr-4">
-                      <span className="text-xs font-bold text-slate-400 uppercase">{fecha.toLocaleDateString('es-ES', { month: 'short' })}</span>
-                      <span className={`text-2xl font-black ${isVencido ? 'text-red-500' : isHoy ? 'text-orange-500' : 'text-slate-700'}`}>{fecha.getDate()}</span>
+                      <span className="text-xs font-bold text-slate-400 uppercase">{evtDateObj.toLocaleDateString('es-CO', { timeZone: 'America/Bogota', month: 'short' })}</span>
+                      <span className={`text-2xl font-black ${isVencido ? 'text-red-500' : isHoy ? 'text-orange-500' : 'text-slate-700'}`}>{evtDateObj.toLocaleDateString('es-CO', { timeZone: 'America/Bogota', day: 'numeric' })}</span>
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <div className="flex items-center gap-2 mb-1">
