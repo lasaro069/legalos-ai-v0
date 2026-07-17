@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { logout } from '../(auth)/actions'
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Sidebar } from '@/components/sidebar'
 
 export default async function DashboardLayout({
   children,
@@ -16,7 +16,7 @@ export default async function DashboardLayout({
 
   const { data: usuarioData } = await supabase
     .from('usuarios')
-    .select('requiere_cambio_password, es_superadmin')
+    .select('requiere_cambio_password, es_superadmin, nombre_completo')
     .eq('id', user?.id)
     .single()
 
@@ -27,7 +27,7 @@ export default async function DashboardLayout({
   // Fetch firma details for the user
   const { data: firmaData } = await supabase
     .from('miembros_firma')
-    .select('rol, firmas(nombre, id, ciudad)')
+    .select('rol, firmas(nombre, id, ciudad, logo_url, eslogan)')
     .eq('usuario_id', user?.id)
     .single()
 
@@ -36,39 +36,85 @@ export default async function DashboardLayout({
   }
 
   const firmaNombre = firmaData?.firmas?.nombre || 'Firma no encontrada'
+  const firmaSlogan = firmaData?.firmas?.eslogan || 'Sistema operativo jurídico'
+  const firmaLogoUrl = firmaData?.firmas?.logo_url
   const rol = firmaData?.rol || 'Miembro'
+  
+  const nombreCompleto = usuarioData?.nombre_completo || user?.email || 'Usuario'
+  const usuarioIniciales = nombreCompleto
+    .split(' ')
+    .map(n => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
+
+  // Calculate alerts (Vencimientos Urgentes)
+  const firmaId = firmaData?.firmas?.id
+  let alertasCount = 0
+  
+  if (firmaId) {
+    const isPrivileged = rol === 'propietario' || rol === 'admin'
+    
+    // Si no es admin, filtramos por sus expedientes
+    let query = supabase
+      .from('eventos_agenda')
+      .select('fecha_inicio', { count: 'exact' })
+      .eq('firma_id', firmaId)
+      .neq('estado', 'realizada')
+      .neq('estado', 'cancelada')
+      
+    if (!isPrivileged) {
+      // get expedientes of this user
+      const { data: userExpedientes } = await supabase
+        .from('expedientes')
+        .select('id')
+        .eq('firma_id', firmaId)
+        .eq('estado', 'activo')
+        .or(`responsable_id.eq.${user?.id},auxiliar_id.eq.${user?.id}`)
+        
+      const expIds = userExpedientes?.map(e => e.id) || []
+      if (expIds.length > 0) {
+        query = query.or(`expediente_id.in.(${expIds.join(',')}),responsable_id.eq.${user?.id}`)
+      } else {
+        query = query.eq('responsable_id', user?.id)
+      }
+    }
+    
+    const { data: eventos, count } = await query
+    
+    if (eventos) {
+      const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' })
+      const hoyYMD = formatter.format(new Date())
+      const hoyStrBog = new Date(`${hoyYMD}T00:00:00`)
+      
+      eventos.forEach(e => {
+        const eventYMD = formatter.format(new Date(e.fecha_inicio))
+        const fechaStrBog = new Date(`${eventYMD}T00:00:00`)
+        const diffDias = Math.round((fechaStrBog.getTime() - hoyStrBog.getTime()) / (1000 * 60 * 60 * 24))
+        
+        if (diffDias <= 3) {
+          alertasCount++
+        }
+      })
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-legal-surface flex flex-col">
-      <header className="bg-legal-ink text-white p-4 shadow-md flex justify-between items-center">
-        <div className="flex items-center gap-8">
-          <div>
-            <h1 className="text-xl font-bold">LegalOS</h1>
-            <p className="text-xs text-legal-line opacity-80">{firmaNombre} ({rol})</p>
-          </div>
-          <nav className="hidden md:flex gap-6 border-l border-legal-navy pl-6 ml-2">
-            <Link href="/dashboard" className="text-gray-300 hover:text-white transition-colors">Inicio</Link>
-            <Link href="/dashboard/expedientes" className="text-gray-300 hover:text-white transition-colors">Expedientes</Link>
-            <Link href="/dashboard/agenda" className="text-gray-300 hover:text-white transition-colors">Agenda</Link>
-            <Link href="/dashboard/contactos" className="text-gray-300 hover:text-white transition-colors">Directorio</Link>
-            <Link href="/dashboard/equipo" className="text-gray-300 hover:text-white transition-colors">Equipo</Link>
-          </nav>
+    <div className="min-h-screen bg-legal-surface flex">
+      <Sidebar 
+        firmaNombre={firmaNombre}
+        firmaSlogan={firmaSlogan}
+        firmaLogoUrl={firmaLogoUrl}
+        usuarioNombre={nombreCompleto}
+        usuarioRol={rol}
+        usuarioIniciales={usuarioIniciales}
+        alertasCount={alertasCount}
+        onLogout={logout}
+      />
+      <main className="flex-1 lg:pl-72 w-full transition-all">
+        <div className="p-8 max-w-7xl mx-auto w-full">
+          {children}
         </div>
-        <div className="flex items-center gap-4">
-          <Link href="/settings" className="p-2 text-gray-300 hover:text-white hover:bg-legal-navy rounded-full transition-colors" title="Ajustes de la firma">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
-          </Link>
-          <span className="text-sm hidden md:inline">{user?.email}</span>
-          <form action={logout}>
-            <button className="px-3 py-1.5 bg-legal-navy hover:bg-legal-obsidian rounded text-sm transition-colors border border-legal-line/20">
-              Cerrar Sesión
-            </button>
-          </form>
-        </div>
-      </header>
-
-      <main className="flex-1 p-8 max-w-7xl mx-auto w-full">
-        {children}
       </main>
     </div>
   )
