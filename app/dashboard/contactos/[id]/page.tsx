@@ -2,6 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Building2, User, Phone, Mail, MapPin, Briefcase } from 'lucide-react'
+import { DeleteContactButton } from '@/components/DeleteContactButton'
 
 export default async function DetalleContactoPage({ params }: { params: { id: string } }) {
   const supabase = createClient()
@@ -86,10 +87,11 @@ export default async function DetalleContactoPage({ params }: { params: { id: st
               </div>
             )}
             
-            <div className="mt-6 pt-6 border-t border-slate-100 text-center">
-               <button className="text-legal-gold hover:underline text-sm font-medium">
-                 Editar contacto (Próximamente)
-               </button>
+            <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col items-center gap-4">
+               <Link href={`/dashboard/contactos/${contacto.id}/editar`} className="bg-legal-gold hover:bg-yellow-600 text-white px-6 py-2 rounded-lg text-sm font-semibold transition-colors w-full text-center">
+                 Editar Contacto
+               </Link>
+               <DeleteContactButton id={contacto.id} expedientesCount={expedientes?.length || 0} />
             </div>
           </div>
         </div>

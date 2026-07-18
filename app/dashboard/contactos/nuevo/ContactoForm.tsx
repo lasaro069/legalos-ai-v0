@@ -1,11 +1,24 @@
 'use client'
 
 import { useState } from 'react'
-import { guardarContacto } from '../acciones'
+import { guardarContacto, actualizarContacto } from '../acciones'
 
-export default function ContactoForm() {
-  const [tipoPersona, setTipoPersona] = useState('natural')
-  const [tipoId, setTipoId] = useState('cc')
+type ContactoData = {
+  id?: string
+  tipo_persona: string
+  nombre: string
+  tipo_identificacion: string
+  identificacion: string | null
+  correo: string | null
+  telefono: string | null
+  direccion: string | null
+  ciudad: string | null
+  observaciones: string | null
+}
+
+export default function ContactoForm({ initialData }: { initialData?: ContactoData }) {
+  const [tipoPersona, setTipoPersona] = useState(initialData?.tipo_persona || 'natural')
+  const [tipoId, setTipoId] = useState(initialData?.tipo_identificacion || 'cc')
 
   const handleTipoPersonaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
@@ -15,8 +28,10 @@ export default function ContactoForm() {
     }
   }
 
+  const action = initialData?.id ? actualizarContacto.bind(null, initialData.id) : guardarContacto
+
   return (
-    <form action={guardarContacto} className="flex flex-col gap-8">
+    <form action={action} className="flex flex-col gap-8">
       
       {/* SECCIÓN 1: DATOS BÁSICOS */}
       <div className="bg-white p-8 rounded-xl shadow-panel border border-legal-line flex flex-col gap-6">
@@ -42,7 +57,7 @@ export default function ContactoForm() {
             <label htmlFor="nombre" className="font-semibold text-sm text-legal-navy">
               {tipoPersona === 'juridica' ? 'Razón Social *' : 'Nombre Completo *'}
             </label>
-            <input type="text" id="nombre" name="nombre" required className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder={tipoPersona === 'juridica' ? 'Ej. Empresa XYZ S.A.S.' : 'Ej. Juan Pérez'} />
+            <input type="text" id="nombre" name="nombre" defaultValue={initialData?.nombre} required className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder={tipoPersona === 'juridica' ? 'Ej. Empresa XYZ S.A.S.' : 'Ej. Juan Pérez'} />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -65,7 +80,7 @@ export default function ContactoForm() {
 
           <div className="flex flex-col gap-2">
             <label htmlFor="identificacion" className="font-semibold text-sm text-legal-navy">Número de Identificación</label>
-            <input type="text" id="identificacion" name="identificacion" className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. 1020304050" />
+            <input type="text" id="identificacion" name="identificacion" defaultValue={initialData?.identificacion || ''} className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. 1020304050" />
           </div>
         </div>
       </div>
@@ -77,22 +92,22 @@ export default function ContactoForm() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col gap-2">
             <label htmlFor="correo" className="font-semibold text-sm text-legal-navy">Correo Electrónico</label>
-            <input type="email" id="correo" name="correo" className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. correo@ejemplo.com" />
+            <input type="email" id="correo" name="correo" defaultValue={initialData?.correo || ''} className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. correo@ejemplo.com" />
           </div>
 
           <div className="flex flex-col gap-2">
             <label htmlFor="telefono" className="font-semibold text-sm text-legal-navy">Teléfono / Celular</label>
-            <input type="text" id="telefono" name="telefono" className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. +57 300 123 4567" />
+            <input type="text" id="telefono" name="telefono" defaultValue={initialData?.telefono || ''} className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. +57 300 123 4567" />
           </div>
 
           <div className="flex flex-col gap-2">
             <label htmlFor="direccion" className="font-semibold text-sm text-legal-navy">Dirección</label>
-            <input type="text" id="direccion" name="direccion" className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. Calle 123 #45-67" />
+            <input type="text" id="direccion" name="direccion" defaultValue={initialData?.direccion || ''} className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. Calle 123 #45-67" />
           </div>
 
           <div className="flex flex-col gap-2">
             <label htmlFor="ciudad" className="font-semibold text-sm text-legal-navy">Ciudad</label>
-            <input type="text" id="ciudad" name="ciudad" className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. Bogotá" />
+            <input type="text" id="ciudad" name="ciudad" defaultValue={initialData?.ciudad || ''} className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Ej. Bogotá" />
           </div>
         </div>
       </div>
@@ -104,7 +119,7 @@ export default function ContactoForm() {
         <div className="grid grid-cols-1 gap-6">
           <div className="flex flex-col gap-2">
             <label htmlFor="observaciones" className="font-semibold text-sm text-legal-navy">Observaciones / Notas Internas</label>
-            <textarea id="observaciones" name="observaciones" rows={3} className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Información adicional relevante..."></textarea>
+            <textarea id="observaciones" name="observaciones" defaultValue={initialData?.observaciones || ''} rows={3} className="border border-legal-line rounded-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-legal-gold/50" placeholder="Información adicional relevante..."></textarea>
           </div>
         </div>
       </div>

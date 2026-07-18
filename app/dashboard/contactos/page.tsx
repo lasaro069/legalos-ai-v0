@@ -2,8 +2,13 @@ import { createClient } from '@/utils/supabase/server'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Building2, User, Phone, Mail, ChevronRight, Plus } from 'lucide-react'
+import { SearchBar } from '@/components/SearchBar'
 
-export default async function ContactosPage() {
+export default async function ContactosPage({
+  searchParams
+}: {
+  searchParams: { q?: string }
+}) {
   const supabase = createClient()
   
   const { data: { user } } = await supabase.auth.getUser()
@@ -20,26 +25,36 @@ export default async function ContactosPage() {
   const firmaIds = miembros?.map(m => m.firma_id) || []
   if (firmaIds.length === 0) return <div>No perteneces a ninguna firma.</div>
 
-  // 2. Traer Contactos
-  const { data: contactos, error } = await supabase
+  // 2. Traer Contactos y aplicar filtro si existe
+  let query = supabase
     .from('contactos')
     .select('*')
     .in('firma_id', firmaIds)
     .order('nombre', { ascending: true })
 
+  if (searchParams.q) {
+    query = query.or(`nombre.ilike.%${searchParams.q}%,identificacion.ilike.%${searchParams.q}%`)
+  }
+
+  const { data: contactos, error } = await query
+
   return (
     <div className="flex flex-col h-full">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Directorio</h2>
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Contactos</h2>
           <p className="text-sm text-slate-500 mt-1">Gestión de clientes y contactos de la firma.</p>
         </div>
-        <Link 
-          href="/dashboard/contactos/nuevo" 
-          className="bg-legal-blue hover:bg-legal-navy text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors text-sm flex items-center gap-2"
-        >
-          <Plus size={18} /> Nuevo Contacto
-        </Link>
+        
+        <div className="flex items-center gap-4 w-full md:w-auto">
+          <SearchBar placeholder="Buscar por nombre o ID..." />
+          <Link 
+            href="/dashboard/contactos/nuevo" 
+            className="bg-legal-blue hover:bg-legal-navy text-white px-5 py-2.5 rounded-lg font-medium shadow-sm transition-colors text-sm flex items-center gap-2 shrink-0"
+          >
+            <Plus size={18} /> Nuevo Contacto
+          </Link>
+        </div>
       </div>
       
       {error && (

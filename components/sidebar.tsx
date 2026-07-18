@@ -12,7 +12,7 @@ const items = [
   { href: "/dashboard/agenda", label: "Control de Términos", icon: CalendarClock },
   { href: "/dashboard/audiencias", label: "Audiencias", icon: CalendarDays },
   { href: "/dashboard/tareas", label: "Tareas", icon: SquareCheckBig },
-  { href: "/dashboard/contactos", label: "Directorio", icon: Phone },
+  { href: "/dashboard/contactos", label: "Contactos", icon: Phone },
   { href: "/dashboard/equipo", label: "Equipo", icon: Users },
   { href: "/dashboard/documentos", label: "Documentos", icon: FileText },
   { href: "/dashboard/financiero", label: "Financiero", icon: CircleDollarSign },
